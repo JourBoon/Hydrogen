@@ -10,20 +10,26 @@ import (
 
 type proxyImpl struct {
     config pkg.ProxyConfig
-    proxy  *httputil.ReverseProxy
+    proxies []*httputil.ReverseProxy
 }
 
 func NewProxy(config pkg.ProxyConfig) pkg.ReverseProxy {
-    targetURL := fmt.Sprintf("http://%s:%d", config.Proxy.BackendAddress, config.Proxy.BackendPort)
-    return &proxyImpl{
-        config: config,
-        proxy:  httputil.NewSingleHostReverseProxy(MustParseURL(targetURL)),
-    }
+    proxies := make([]*httputil.ReverseProxy, len(config.Proxy.Backends))
+	for i, backend := range config.Proxy.Backends {
+		targetURL := fmt.Sprintf("http://%s:%d", backend.Address, backend.Port)
+		proxies[i] = httputil.NewSingleHostReverseProxy(pkg.MustParseURL(targetURL))
+	}
+
+	return &proxyImpl{
+		config: config,
+		proxies: proxies,
+	}
 }
 
 func (pi *proxyImpl) HandleRequest(w http.ResponseWriter, r *http.Request) {
     pkg.Info("Request Specification - below:", r.Method, r.URL.Path)
-    pi.proxy.ServeHTTP(w, r)
+    selectedProxy := pi.proxies[0]
+    selectedProxy.ServeHTTP(w, r)
 }
 
 func MustParseURL(rawURL string) *url.URL {

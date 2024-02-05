@@ -11,13 +11,16 @@ type ReverseProxy interface {
 
 type ProxyConfig struct {
 	Proxy struct {
-		ListenAddress  string `json:"listen_address"`
-		ListenPort     int    `json:"listen_port"`
-		BackendAddress string `json:"backend_address"`
-		BackendPort    int    `json:"backend_port"`
+	  ListenAddress string `json:"listen_address"`
+	  ListenPort    int    `json:"listen_port"`
+	  Backends      []struct {
+		Address string `json:"address"`
+		Port    int    `json:"port"`
+	  } `json:"backends"`
 	} `json:"proxy"`
 	Security struct {
-		RateLimit       int `json:"rate_limit"`
-		TimeoutSeconds  int `json:"timeout_seconds"`
+	  RateLimit      int `json:"rate_limit"`
+	  TimeoutSeconds int `json:"timeout_seconds"`
 	} `json:"security"`
-}
+  }
+  
