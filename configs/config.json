@@ -11,10 +11,16 @@
         "address": "127.0.0.1",
         "port": 8082
       }
-    ]
+    ],
+    "load_balancer": "round_robin"
   },
   "security": {
     "rate_limit": 100,
     "timeout_seconds": 5
+  },
+  "protocol": {
+    "layer2": true,
+    "layer3": true,
+    "layer7": true
   }
 }
