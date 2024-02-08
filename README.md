@@ -70,6 +70,8 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 
 ## :checkered_flag: Starting ##
 
+Go to https://reverse.hydrogen.com/about
+
 ```bash
 # Clone this project
 $ git clone https://github.com/{{YOUR_GITHUB_USERNAME}}/hydrogen
