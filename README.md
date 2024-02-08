@@ -39,7 +39,7 @@
   <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
   <a href="#memo-license">License</a> &#xa0; | &#xa0;
-  <a href="https://github.com/{{YOUR_GITHUB_USERNAME}}" target="_blank">Author</a>
+  <a href="https://github.com/JourBoon" target="_blank">Author</a>
 </p>
 
 <br>
@@ -74,7 +74,7 @@ Go to https://reverse.hydrogen.com/about
 
 ```bash
 # Clone this project
-$ git clone https://github.com/{{YOUR_GITHUB_USERNAME}}/hydrogen
+$ git clone https://github.com/JourBoon/hydrogen
 
 # Access
 $ cd hydrogen
