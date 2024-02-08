@@ -21,6 +21,9 @@
   "protocol": {
     "layer2": true,
     "layer3": true,
+    "layer4": true,
+    "layer5": true,
+    "layer6": true,
     "layer7": true
   }
 }
