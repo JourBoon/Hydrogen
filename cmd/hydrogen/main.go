@@ -1,38 +1,69 @@
-// main.go
 package main
 
 import (
-    "fmt"
+	"flag"
+	"fmt"
+	"log"
+	"net/url"
 	"net/http"
-	"hydrogen/internal/app/hydrogen"
-	"hydrogen/pkg"
+	"net/http/httputil"
+	"strings"
+	"time"
 )
 
+var serverPool ServerPool
+
 func main() {
-	config, err := pkg.LoadConfig("configs/config.json")
-	if err != nil {
-		fmt.Println("Error while reading configuration file:", err)
-		return
+	var serverList string
+	var port int
+	flag.StringVar(&serverList, "backends", "", "Load balanced backends, use commas to separate")
+	flag.IntVar(&port, "port", 3030, "Port to serve")
+	flag.Parse()
+
+	if len(serverList) == 0 {
+		log.Fatal("Please provide one or more backends to load balance")
 	}
 
-	listenAddress, err := pkg.GetConfigValue(config, "proxy.listen_address")
-	if err != nil {
-		fmt.Println("Error while fetching value:", err)
-		return
+	tokens := strings.Split(serverList, ",")
+	for _, tok := range tokens {
+		serverUrl, err := url.Parse(tok)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		proxy := httputil.NewSingleHostReverseProxy(serverUrl)
+		proxy.ErrorHandler = handleProxyError
+
+		serverPool.AddBackend(&Backend{
+			URL:          serverUrl,
+			Alive:        true,
+			ReverseProxy: proxy,
+		})
+		log.Printf("Configured server: %s\n", serverUrl)
 	}
 
-	listenPort, err := pkg.GetConfigValue(config, "proxy.listen_port")
-	if err != nil {
-		fmt.Println("Error while fetching value:", err)
-		return
+	server := http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: http.HandlerFunc(lb),
 	}
 
-	addr := fmt.Sprintf("%s:%d", listenAddress, listenPort)
+	go healthCheck()
 
-	proxy := internal.NewProxy(*config)
+	log.Printf("Load Balancer started at :%d\n", port)
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+}
 
-	http.HandleFunc("/", proxy.HandleRequest)
 
-	pkg.Info("Hydrogen listening on %s... \n Waiting for entries...", addr)
-	http.ListenAndServe(addr, nil)
+func healthCheck() {
+    t := time.NewTicker(time.Minute * 2)
+    for {
+        select {
+        case <-t.C:
+            log.Println("Starting health check...")
+            serverPool.HealthCheck()
+            log.Println("Health check completed")
+        }
+    }
 }
